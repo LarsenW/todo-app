@@ -1,0 +1,9 @@
+{
+  "url": "http://ec2-54-201-172-12.us-west-2.compute.amazonaws.com:9000",
+  "host": "localhost",
+  "port": 3000,
+  "mongoose": {
+    "development_uri": "mongodb://root:1111@ds129469.mlab.com:29469/todo-app-dev",
+    "test_uri": "mongodb://root:1111@ds127949.mlab.com:27949/todo-app-test"
+  }
+}
