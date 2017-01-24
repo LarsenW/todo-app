@@ -2,8 +2,11 @@
 
 const mongoose = require('mongoose');
 const db = mongoose.connection;
+const config = require('../config');
 
 module.exports = function (dbURI) {
+
+    let reconnectionAttempts = 0;
 
     db.on('connecting', function () {
         console.log('connecting to MongoDB...');
@@ -13,18 +16,24 @@ module.exports = function (dbURI) {
         console.error('Error in MongoDb connection: ' + error);
         mongoose.disconnect();
     });
+
     db.on('connected', function () {
-        console.log('MongoDB connected!\n',dbURI);
+        console.log('MongoDB connected!', dbURI);
     });
+
     db.once('open', function () {
-        console.log('MongoDB connection opened!');
+        reconnectionAttempts = 0;
     });
-    db.on('reconnected', function () {
-        console.log('MongoDB reconnected!');
-    });
+
     db.on('disconnected', function () {
         console.log('MongoDB disconnected!');
-        mongoose.connect(dbURI, {server: {auto_reconnect: true}});
+        if (reconnectionAttempts < config.mongoose.maxConnectionAttempts) {
+            setTimeout(() => {
+                reconnectionAttempts++;
+                mongoose.connect(dbURI, {server: {auto_reconnect: true}});
+            }, config.mongoose.reconnectionIntervalMs);
+        }
     });
+
     mongoose.connect(dbURI, {server: {auto_reconnect: true}});
 };
